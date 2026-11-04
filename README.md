@@ -90,7 +90,10 @@ Exact setup screens and supported configuration options may vary by Switch versi
 
 ## Suggested demo
 
-A useful demonstration should show:
+<img width="1273" height="555" alt="image" src="https://github.com/user-attachments/assets/8e743138-198b-4381-ac22-25a3c727c77e" />
+<img width="1266" height="555" alt="image" src="https://github.com/user-attachments/assets/a6a87501-97f4-4770-bf32-028992bf4bbd" />
+
+
 
 - The incident being introduced in the Telegram-connected command center.
 - The Coordinator delegating to the Investigator and Reviewer.
