@@ -36,7 +36,8 @@ SwitchOps separates these responsibilities across focused agents while keeping c
 
 SwitchOps follows an end-to-end, human-led multi-agent incident response workflow. The diagram below will illustrate the communication between the human incident commander, Telegram, Switch orchestration, the four Claude Code agents, and the human approval checkpoints across the incident lifecycle.
 
-<!-- System architecture image will be added here once provided. -->
+<img width="383" height="212" alt="image" src="https://github.com/user-attachments/assets/60bb9325-ffe5-495f-9d79-c39e1635ef30" />
+
 
 ## Multi-agent architecture
 
