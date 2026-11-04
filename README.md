@@ -6,6 +6,21 @@ SwitchOps is a demonstration of how specialized AI agents can collaborate during
 
 > **Project status:** This repository currently documents the SwitchOps agent workflow and its demonstrated incident-response simulation. It does not yet contain an exported copy of the local Switch configuration or agent working directories. The INC-001 scenario described below was a simulation; no production systems were accessed or changed.
 
+## 🎥 Project Demo
+
+Watch the end-to-end SwitchOps walkthrough:
+
+**[▶ Watch the SwitchOps demo recording (MP4)](https://github.com/vaishalisen2002/switchops/releases/download/v1.0-demo/SwitchOps.mp4)** · [View the GitHub release](https://github.com/vaishalisen2002/switchops/releases/tag/v1.0-demo)
+
+The recording demonstrates:
+- **Coordinator:** incident intake, triage, and task delegation.
+- **Investigator:** technical investigation and ranked root-cause hypotheses.
+- **Reviewer:** independent validation, challenges, and risk assessment.
+- **Reporter:** consolidated incident reporting.
+- **Human-in-the-loop:** approval boundaries and controlled decision-making.
+
+*The video uses a simulated UPI payment gateway incident (INC-DEMO-001). No production systems were accessed or modified.*
+
 ## Why SwitchOps?
 
 Incident response often requires several activities to happen in parallel:
@@ -88,20 +103,10 @@ To explore or reproduce the workflow:
 
 Exact setup screens and supported configuration options may vary by Switch version.
 
-## Suggested demo
+## Screenshots
 
-<img width="1273" height="555" alt="image" src="https://github.com/user-attachments/assets/8e743138-198b-4381-ac22-25a3c727c77e" />
-<img width="1266" height="555" alt="image" src="https://github.com/user-attachments/assets/a6a87501-97f4-4770-bf32-028992bf4bbd" />
-
-
-
-- The incident being introduced in the Telegram-connected command center.
-- The Coordinator delegating to the Investigator and Reviewer.
-- The Reviewer identifying gaps and challenging assumptions.
-- The Reporter creating a draft and incorporating review feedback.
-- The Coordinator approving the final report while the human retains control of operational decisions.
-
-Add screenshots or a demo video here when they are ready.
+<img width="1273" height="555" alt="SwitchOps command center screenshot" src="https://github.com/user-attachments/assets/8e743138-198b-4381-ac22-25a3c727c77e" />
+<img width="1266" height="555" alt="SwitchOps agent workflow screenshot" src="https://github.com/user-attachments/assets/a6a87501-97f4-4770-bf32-028992bf4bbd" />
 
 ## Roadmap
 
