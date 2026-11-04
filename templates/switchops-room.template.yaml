@@ -1,0 +1,72 @@
+# SwitchOps incident-response room template.
+# Version 1 room templates can be used without managed-agent provisioning.
+version: 1
+
+params:
+  room_name:
+    type: string
+    label: Room name
+    description: Name of the SwitchOps incident command room.
+    default: SwitchOps Command Center
+  bridge:
+    type: bridge
+    label: Messaging app
+    description: Messaging app for the incident room. Uses the default app if left empty.
+    default: [$first]
+    required: false
+  coordinator:
+    type: agent
+    label: Coordinator agent
+    description: Existing SwitchOps coordinator agent on this Switch workspace.
+    default: [switchops-coordinator, $first]
+  investigator:
+    type: agent
+    label: Investigator agent
+    description: Existing SwitchOps investigator agent on this Switch workspace.
+    default: [switchops-investigator, $first]
+  reviewer:
+    type: agent
+    label: Reviewer agent
+    description: Existing SwitchOps reviewer agent on this Switch workspace.
+    default: [switchops-reviewer, $first]
+  reporter:
+    type: agent
+    label: Reporter agent
+    description: Existing SwitchOps reporter agent on this Switch workspace.
+    default: [switchops-reporter, $first]
+
+room:
+  name: "{room_name}"
+  description: Human-led incident response command center for triage, investigation, independent review, approvals, and incident reporting.
+  bridge: "{bridge}"
+  channel_type: channel_private
+  agents:
+    - "{coordinator}"
+    - "{investigator}"
+    - "{reviewer}"
+    - "{reporter}"
+  users:
+    - "{$creator}"
+  instructions: |
+    This room coordinates SwitchOps incident response.
+
+    WORKFLOW
+    - Start incident work by explicitly mentioning switchops-coordinator.
+    - The coordinator owns incident state, triage, task assignment, approval tracking, and final status.
+    - switchops-investigator gathers evidence, ranks hypotheses, and proposes verification steps.
+    - switchops-reviewer independently challenges assumptions, checks safety, and identifies missing evidence.
+    - switchops-reporter produces the executive summary, timeline, findings, decisions, risks, and follow-up actions.
+    - Keep the incident open until recovery and root cause are supported by evidence.
+    - If an agent is silent, mention its exact agent name directly and note the missing response.
+
+    SAFETY
+    - Distinguish facts, hypotheses, and recommendations.
+    - Do not invent logs, metrics, timestamps, or system state.
+    - Label simulated incidents clearly.
+    - No consequential production action without explicit human approval.
+    - Approval to prepare a plan is not approval to execute it.
+    - Never report an action as completed without verification.
+    - Preserve disagreements, unknowns, and outstanding risks.
+
+    INCIDENT UPDATE FORMAT
+    Incident ID and title; severity and status; confirmed facts; hypotheses; impact; evidence needed; investigation/reviewer findings; approved and unapproved actions; next steps and owners.
