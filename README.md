@@ -54,7 +54,6 @@ And one more member, who outranks them all: **you, the human incident lead.**
 
 ## How it works
 
-<img width="1273" height="555" alt="SwitchOps system architecture" src="https://github.com/user-attachments/assets/60bb9325-ffe5-495f-9d79-c39e1635ef30" />
 
 Here's one incident from start to finish:
 
