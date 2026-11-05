@@ -1,135 +1,191 @@
+<div align="center">
+
 # SwitchOps
 
-**A multi-agent AI incident response workflow with coordinated investigation, independent review, human-in-the-loop approvals, and structured incident reporting.**
+### The AI incident response team that argues with itself, then asks a human.
 
-SwitchOps is a demonstration of how specialized AI agents can collaborate during an operational incident. It uses Switch to coordinate locally running Claude Code agents and a Telegram-connected command center. The workflow is designed to help an incident lead organize investigation, challenge assumptions, track approval boundaries, and produce a clear incident report.
+[![Built with Switch](https://img.shields.io/badge/built%20with-Switch-FF895E)](https://github.com/sandbox-quantum/switch)
+[![Agents: Claude Code](https://img.shields.io/badge/agents-Claude%20Code-6B5B95)](https://claude.com/claude-code)
+[![Command center: Telegram](https://img.shields.io/badge/command%20center-Telegram-26A5E4?logo=telegram&logoColor=white)](https://telegram.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Status: simulated demo](https://img.shields.io/badge/status-simulated%20demo-lightgrey)](#the-test-a-payment-outage-with-no-easy-answer)
 
-> **Project status:** This repository currently documents the SwitchOps agent workflow and its demonstrated incident-response simulation. It does not yet contain an exported copy of the local Switch configuration or agent working directories. The INC-001 scenario described below was a simulation; no production systems were accessed or changed.
+**[▶ Watch the demo](https://github.com/vaishalisen2002/switchops/releases/download/v1.0-demo/SwitchOps.mp4)** · **[📖 Read the story on Medium](https://medium.com/@senvaishali91/the-most-dangerous-thing-in-an-outage-is-a-convincing-wrong-answer-so-i-built-an-ai-team-on-switch-5a4be1ea52b4)** · [See it work](#the-test-a-payment-outage-with-no-easy-answer) · [Try it yourself](#try-it-yourself)
 
-## 🎥 Project Demo
+</div>
 
-Watch the end-to-end SwitchOps walkthrough:
+---
 
-**[▶ Watch the SwitchOps demo recording (MP4)](https://github.com/vaishalisen2002/switchops/releases/download/v1.0-demo/SwitchOps.mp4)** · [View the GitHub release](https://github.com/vaishalisen2002/switchops/releases/tag/v1.0-demo)
+Payments are failing. A deployment went out twenty minutes ago. Within seconds, everyone has the same story: *the deploy broke it, roll it back.*
 
-The recording demonstrates:
-- **Coordinator:** incident intake, triage, and task delegation.
-- **Investigator:** technical investigation and ranked root-cause hypotheses.
-- **Reviewer:** independent validation, challenges, and risk assessment.
-- **Reporter:** consolidated incident reporting.
-- **Human-in-the-loop:** approval boundaries and controlled decision-making.
+The story is tidy, and it might be wrong. The bank could be down. The rollback could collide with a schema change. Retrying those stuck payments could charge customers twice.
 
-*The video uses a simulated UPI payment gateway incident (INC-DEMO-001). No production systems were accessed or modified.*
+Ask a single AI assistant what went wrong and you'll get a fluent, confident answer, whether or not the evidence supports it. Nobody in that chat is there to disagree.
 
-## Why SwitchOps?
+**SwitchOps puts someone in the room whose job is to disagree.** Four specialized AI agents work an incident together in one shared chat, keeping facts apart from guesses and challenging each other in the open. Nothing consequential happens until a human says so.
 
-Incident response often requires several activities to happen in parallel:
+> [!NOTE]
+> SwitchOps is a demonstration. Its test incident is simulated, and no production systems were accessed or changed.
 
-- Coordinating the response and assigning investigation tasks.
-- Investigating possible causes without treating assumptions as facts.
-- Independently reviewing evidence, risks, and proposed mitigations.
-- Communicating the situation and decisions clearly to stakeholders.
+## What makes it different
 
-SwitchOps separates these responsibilities across focused agents while keeping consequential decisions under human control.
+- **🔍 Guesses stay labelled as guesses.** Agents separate confirmed facts, hypotheses and recommendations.
+- **⚔️ Every diagnosis gets challenged.** An independent Reviewer can accept a proposal, accept it with conditions, or reject it.
+- **✋ Recommending never counts as approving.** A rollback plan can be ready to go and still not be authorized.
+- **📂 A finished report doesn't close an incident.** It stays open until recovery and root cause are supported by evidence.
 
-## 🏗️ System Architecture
+## Who it's for
 
-SwitchOps follows an end-to-end, human-led multi-agent incident response workflow. The diagram below will illustrate the communication between the human incident commander, Telegram, Switch orchestration, the four Claude Code agents, and the human approval checkpoints across the incident lifecycle.
+- **On-call engineers and SREs** who want a second opinion at 3 a.m.
+- **Incident commanders** who need to see what's known, what's assumed and what's waiting on them.
+- **Small teams** without enough people to fill every incident role.
+- **Teams in high-stakes domains** like payments, where a hasty fix can do more damage than the outage.
 
-<img width="1273" height="555" alt="image" src="https://github.com/user-attachments/assets/60bb9325-ffe5-495f-9d79-c39e1635ef30" />
+## Meet the team
 
+| Agent | Its job | The rule it lives by |
+|---|---|---|
+| 🧭 `switchops-coordinator` | Leads triage, delegates work, consolidates findings, tracks decisions and maintains incident status | Keep the incident open until the evidence says otherwise |
+| 🔬 `switchops-investigator` | Ranks technical hypotheses, identifies the evidence needed and proposes safe investigation or remediation plans | A hypothesis is not a root cause |
+| ⚖️ `switchops-reviewer` | Challenges assumptions, checks risks, finds missing evidence and reviews proposed actions | Never agree by default |
+| 📝 `switchops-reporter` | Produces the executive summary, timeline, findings, decisions, risks and follow-up actions | Record what was decided, and what wasn't approved |
 
-## Multi-agent architecture
+And one more member, who outranks them all: **you, the human incident lead.**
 
-The workflow uses four specialized agents in a shared **SwitchOps Command Center** room.
+## How it works
 
-| Agent | Responsibility |
+<img width="1273" height="555" alt="SwitchOps system architecture" src="https://github.com/user-attachments/assets/60bb9325-ffe5-495f-9d79-c39e1635ef30" />
+
+Here's one incident from start to finish:
+
+```mermaid
+sequenceDiagram
+    actor H as Human incident lead
+    participant C as Coordinator
+    participant I as Investigator
+    participant V as Reviewer
+    participant R as Reporter
+
+    H->>C: Report the incident in Telegram
+    C->>I: Investigate
+    C->>V: Review independently
+    I->>I: Rank hypotheses, identify evidence needed
+    I->>V: Share reasoning and plans
+    V->>C: Challenges, risks and a verdict
+    I->>C: Findings
+    C->>H: What's known, and what needs your decision
+    H->>C: Approve or reject each action
+    C->>R: Prepare the report
+    R->>I: Draft for checking
+    R->>V: Draft for checking
+    I-->>R: Corrections
+    V-->>R: Corrections
+    R->>C: Revised report
+    C->>H: Final report and status
+```
+
+## The test: a payment outage with no easy answer
+
+I gave the team a simulated UPI payment gateway incident, **INC-DEMO-001**, with a deliberately thin brief: payments failing or stuck in pending, a deployment about 20 minutes ago, and no logs, metrics, deployment diff or provider status.
+
+The timing points straight at the deployment, and nothing proves it. Here's how the team handled that trap.
+
+**The Coordinator refused to treat the theory as fact:**
+
+> **Assumption (not evidence):** the deploy caused it. The timing points that way, but it doesn't prove it.
+
+**The Investigator ranked four hypotheses:** a deployment regression, a callback or webhook failure, connection-pool or infrastructure exhaustion, and an upstream PSP or bank issue. It also prepared a rollback-readiness plan.
+
+**The Reviewer pushed back,** returning **ACCEPT WITH CONDITIONS**. Among its challenges:
+
+- Deployment timing alone doesn't prove causation.
+- Raising timeouts without understanding the exhaustion could make things worse.
+- Callback signature verification must never be disabled as a shortcut.
+- Payment retries must account for idempotency, or customers could be charged twice.
+
+**The human drew the line.** Preparing a hypothetical rollback plan and a deployment-freeze recommendation was approved. Executing the rollback, changing configuration, retrying payments, replaying the DLQ, issuing refunds and contacting customers all stayed unapproved.
+
+**And the team stayed honest about the ending:**
+
+> **Resolved:** NO. There is no recovery evidence and no fix has been run.<br>
+> **Root cause confirmed:** NO.<br>
+> **Status:** OPEN
+
+A lot of AI demos end with a confident answer. This one ends by saying what it doesn't know yet.
+
+<table>
+<tr>
+<td><img alt="SwitchOps command center" src="https://github.com/user-attachments/assets/8e743138-198b-4381-ac22-25a3c727c77e"></td>
+<td><img alt="SwitchOps agent workflow" src="https://github.com/user-attachments/assets/a6a87501-97f4-4770-bf32-028992bf4bbd"></td>
+</tr>
+</table>
+
+## Why Switch
+
+[Switch](https://github.com/sandbox-quantum/switch) brings AI agents into the chat apps people already use, as named participants in a shared room. It's what turns four agents into one team:
+
+| SwitchOps needs | Switch provides |
 |---|---|
-| `switchops-coordinator` | Leads triage, delegates work, consolidates findings, tracks decisions, and maintains incident status. |
-| `switchops-investigator` | Develops and ranks technical hypotheses, identifies evidence needed, and proposes safe investigation or remediation plans. |
-| `switchops-reviewer` | Independently challenges assumptions, checks risks, identifies missing evidence, and reviews proposed actions. |
-| `switchops-reporter` | Produces an executive summary, timeline, findings, decisions, risks, and follow-up actions. |
+| One source of truth for the incident | Rooms that hold context, members and rules |
+| Specialized agents | Named agents, each with its own role and working directory |
+| A place for the human commander | A Telegram connection, so nobody learns a new tool mid-outage |
+| Visible handoffs and disagreement | Mentions and a shared conversation |
+| Limits on who can direct an agent | Owner-controlled access to each agent |
+| A repeatable setup | YAML room and agent templates |
 
-### High-level workflow
+## The guardrails
 
-1. The human incident lead reports an incident in the command center.
-2. The Coordinator establishes the incident context and delegates investigation and review.
-3. The Investigator develops hypotheses and identifies evidence required to confirm or rule them out.
-4. The Reviewer independently evaluates the reasoning, proposed mitigations, and operational risks.
-5. The Coordinator consolidates findings and records decisions and approval boundaries.
-6. The Reporter prepares a draft incident report.
-7. The Investigator and Reviewer check the report; the Reporter incorporates corrections.
-8. The Coordinator reviews the final report. The human remains responsible for approving consequential actions.
-
-## Technology and integrations
-
-- **Switch** — agent orchestration, shared room, and local agent sessions.
-- **Claude Code** — execution provider for the locally configured agents.
-- **Telegram** — chat interface connected to the SwitchOps command center.
-
-The agents were configured to run locally on the user's computer. This repository does not include credentials, Telegram bot tokens, private configuration, or local agent working directories.
-
-## Human-in-the-loop safety
-
-SwitchOps is designed to distinguish between analysis and execution.
+These rules are written into the room and agent instructions:
 
 - Separate confirmed facts from hypotheses and recommendations.
-- Do not fabricate logs, metrics, timestamps, or evidence.
-- Do not claim a root cause is confirmed without supporting evidence.
+- Never fabricate logs, metrics, timestamps or evidence.
+- Never claim a root cause is confirmed without supporting evidence.
 - Require explicit human approval before consequential production actions.
-- Record approved, rejected, and pending decisions separately.
-- Treat rollback, retries, DLQ replay, refunds, configuration changes, and customer communications as actions that may require separate approval.
-- Label simulations clearly and never describe simulated actions as completed production changes.
+- Treat approval to prepare a plan as separate from approval to execute it.
+- Record approved, rejected and pending decisions separately.
+- Treat rollbacks, retries, DLQ replay, refunds, configuration changes and customer communications as actions that may need separate approval.
+- Label simulations clearly, and never describe simulated actions as completed production changes.
 
-These are workflow guardrails demonstrated in the agent instructions; they are not a substitute for production access controls, monitoring, or operational policy.
+> [!IMPORTANT]
+> These are workflow guardrails in agent instructions. They don't replace production access controls, monitoring or operational policy.
 
-## Demonstration: INC-001 — UPI payment gateway incident
+## Try it yourself
 
-A simulated incident was used to test the collaboration workflow.
+You'll need [Switch](https://docs.switchagents.ai/switch-rooms/getting-started), [Claude Code](https://claude.com/claude-code) and a Telegram bot and group.
 
-**Scenario:** Payments were reported as failing or remaining pending after a recent payment-service deployment. No real logs, metrics, deployment diff, or production access were supplied.
+1. **Install Switch Console.** Its assistant, switch-buddy, can help you with setup.
+2. **Create the agents.** Start with the [Coordinator template](templates/switchops-coordinator.v2.template.yaml), then create the Investigator, Reviewer and Reporter using the roles above. Give each its own working directory.
+3. **Allow delegation.** Set each agent's access to **Only me and my agents** so they can hand work to each other.
+4. **Create the room.** Use the [room template](templates/switchops-room.template.yaml). The [exported Command Center configuration](templates/switchops-command-center.yaml) is there for reference.
+5. **Connect Telegram,** following Switch's current documentation. Keep bot tokens and credentials private.
+6. **Run a simulated incident.** Mention `switchops-coordinator`, label the incident as a simulation, and check that facts stay separate from hypotheses and nothing consequential happens without your approval.
 
-The Investigator ranked several possible explanations, including a deployment regression, callback or webhook handling, connection-pool or infrastructure exhaustion, and an upstream PSP/bank issue. The Reviewer challenged the assumption that deployment timing proved causation and highlighted risks around retries, idempotency, callback verification, refunds, and reconciliation.
+Setup screens and options may vary by Switch version. This repository doesn't include credentials, bot tokens or local agent working directories.
 
-The team prepared a rollback plan but did not execute it. The simulation recorded a human approval to freeze further deployments, while other operational actions remained unapproved. The final review accepted the investigation plan with conditions, not a confirmed diagnosis.
+## What's next
 
-**Outcome:** The incident remained open in the simulation, the root cause remained unconfirmed, and no production systems were changed.
-
-## Getting started
-
-This repository is a project overview and workflow record. The current setup was performed through the Switch interface; a portable, scripted installation is not included here.
-
-To explore or reproduce the workflow:
-
-1. Review the [Switch documentation](https://docs.switchagents.ai/llms.txt) and the custom-agent setup guidance.
-2. Set up Switch and configure a room for the incident-response workflow.
-3. Create the four agents listed in the architecture section, using their responsibilities as the basis for their instructions.
-4. Configure the agents to run locally with Claude Code, each with its own working directory.
-5. Connect a Telegram bot and group to the room, following Switch's current documentation. Keep bot tokens and credentials private.
-6. Run a clearly labelled simulated incident first. Verify that agents distinguish facts from hypotheses and that no consequential action is taken without human approval.
-
-Exact setup screens and supported configuration options may vary by Switch version.
-
-## Screenshots
-
-<img width="1273" height="555" alt="SwitchOps command center screenshot" src="https://github.com/user-attachments/assets/8e743138-198b-4381-ac22-25a3c727c77e" />
-<img width="1266" height="555" alt="SwitchOps agent workflow screenshot" src="https://github.com/user-attachments/assets/a6a87501-97f4-4770-bf32-028992bf4bbd" />
-
-## Roadmap
-
-- [ ] Export and publish a sanitized, reproducible agent configuration.
-- [ ] Add example agent instruction files.
-- [ ] Add redacted screenshots and a short end-to-end demo.
-- [ ] Define reusable incident templates and severity criteria.
-- [ ] Add structured incident data and report versioning.
-- [ ] Add automated tests for approval boundaries and fact-versus-hypothesis handling.
+- [x] Record an end-to-end demo
+- [x] Publish room and Coordinator templates
+- [ ] Publish Investigator, Reviewer and Reporter templates
+- [ ] Add reusable incident templates and severity criteria
+- [ ] Add structured incident data and report versioning
+- [ ] Add automated tests for approval boundaries and fact-versus-hypothesis handling
+- [ ] Connect real logs, metrics and traces
 
 ## Contributing
 
-Suggestions and improvements are welcome. Please avoid submitting secrets, personal data, real customer information, production logs, or unredacted incident details.
-
-For substantial changes, open an issue describing the proposed improvement before submitting a pull request.
+Ideas and improvements are welcome. For substantial changes, please open an issue first. Please don't submit secrets, personal data, real customer information, production logs or unredacted incident details.
 
 ## License
 
-No license has been selected yet. Until a license is added, the repository should be treated as having all rights reserved; do not assume that reuse, modification, or redistribution is permitted.
+SwitchOps is released under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+**AI shouldn't remove people from critical decisions. It should give them better information, stronger validation and a team that's ready to work.**
+
+⭐ If this made you rethink AI in incident response, consider starring the repo.
+
+</div>
