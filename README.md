@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Status: simulated demo](https://img.shields.io/badge/status-simulated%20demo-lightgrey)](#the-test-a-payment-outage-with-no-easy-answer)
 
-**[▶ Watch the demo](https://github.com/vaishalisen2002/switchops/releases/download/v1.0-demo/SwitchOps.mp4)** · **[📖 Read the story on Medium](https://medium.com/@senvaishali91/the-most-dangerous-thing-in-an-outage-is-a-convincing-wrong-answer-so-i-built-an-ai-team-on-switch-5a4be1ea52b4)** · [See it work](#the-test-a-payment-outage-with-no-easy-answer) · [Try it yourself](#try-it-yourself)
+**[▶ Watch the demo](https://github.com/vaishalisen2002/switchops/releases/download/v1.0-demo/SwitchOps.mp4)** · **[📖 Read the story on Medium](https://medium.com/@senvaishali91/the-most-dangerous-thing-in-an-outage-is-a-convincing-wrong-answer-so-i-built-an-ai-team-on-switch-5a4be1ea52b4)** · [See it work](#the-test-a-payment-outage-with-no-easy-answer) · [Set it up](#setup-guide)
 
 </div>
 
@@ -148,18 +148,161 @@ These rules are written into the room and agent instructions:
 > [!IMPORTANT]
 > These are workflow guardrails in agent instructions. They don't replace production access controls, monitoring or operational policy.
 
-## Try it yourself
+## Setup guide
 
-You'll need [Switch](https://docs.switchagents.ai/switch-rooms/getting-started), [Claude Code](https://claude.com/claude-code) and a Telegram bot and group.
+This takes you from nothing to a running SwitchOps room on your own computer. SwitchOps has no code to install or build: it's a configuration of [Switch](https://github.com/sandbox-quantum/switch), Claude Code and Telegram.
 
-1. **Install Switch Console.** Its assistant, switch-buddy, can help you with setup.
-2. **Create the agents.** Start with the [Coordinator template](templates/switchops-coordinator.v2.template.yaml), then create the Investigator, Reviewer and Reporter using the roles above. Give each its own working directory.
-3. **Allow delegation.** Set each agent's access to **Only me and my agents** so they can hand work to each other.
-4. **Create the room.** Use the [room template](templates/switchops-room.template.yaml). The [exported Command Center configuration](templates/switchops-command-center.yaml) is there for reference.
-5. **Connect Telegram,** following Switch's current documentation. Keep bot tokens and credentials private.
-6. **Run a simulated incident.** Mention `switchops-coordinator`, label the incident as a simulation, and check that facts stay separate from hypotheses and nothing consequential happens without your approval.
+### What you need
 
-Setup screens and options may vary by Switch version. This repository doesn't include credentials, bot tokens or local agent working directories.
+- A Mac, Windows or Linux computer
+- A [Claude Code](https://claude.com/claude-code) account (Switch uses your own credentials)
+- A Telegram account **with a username**, because Switch identifies you by your `@username`
+
+### 1. Install Switch Console
+
+Download the desktop app for your system from the [Switch releases page](https://github.com/sandbox-quantum/switch/releases) and open it. Its **Setting up Switch** checklist tracks your progress, and its assistant, switch-buddy, can answer questions along the way.
+
+### 2. Add a server
+
+From the checklist, select **Add a server**, then **Run a server on this computer**. Switch Console sets everything up, and you don't need Docker. It won't restart on its own after you reboot your computer.
+
+### 3. Check Claude Code
+
+Go to **Settings → Agent providers** and confirm Claude Code says **Installed**. If it doesn't, install it from there.
+
+### 4. Create the four agents
+
+Go to **Your Agents** and create one agent for each row below. The names must match exactly, because the room rules and instructions refer to them.
+
+| Name | Description | Instructions |
+|---|---|---|
+| `switchops-coordinator` | Orchestrates incident response, tracks approvals and maintains status | Copy the `instructions` block from the [Coordinator template](templates/switchops-coordinator.v2.template.yaml) |
+| `switchops-investigator` | Ranks hypotheses and identifies the evidence needed | Use the starter below |
+| `switchops-reviewer` | Independently challenges findings and evaluates risks | Use the starter below |
+| `switchops-reporter` | Produces the structured incident report | Use the starter below |
+
+For each agent:
+
+- **Run location:** local
+- **Agent provider:** Claude Code
+- **Working directory:** a separate folder for each agent, containing nothing sensitive, because the agent can read what's there
+- **Who can talk to your agent:** **Only me and my agents**. On the default setting, delegation between your agents fails.
+
+<details>
+<summary><b>Starter instructions for the Investigator, Reviewer and Reporter</b></summary>
+
+These are starting points based on each agent's role. Adjust them to suit your team.
+
+**switchops-investigator**
+
+```text
+You are the Incident Investigator for SwitchOps, a human-led AI incident-response workflow.
+
+Analyze the evidence supplied. Develop and rank root-cause hypotheses. For each one, state the evidence that would confirm or rule it out. Recommend safe diagnostic steps, and prepare remediation or rollback plans for review.
+
+Clearly separate confirmed facts, hypotheses and recommendations. Timing correlation is not proof of root cause. Never fabricate logs, metrics, timestamps or results. Never execute changes or claim a root cause is confirmed without evidence. Label simulations clearly. Post your findings in the room for switchops-coordinator and switchops-reviewer.
+```
+
+**switchops-reviewer**
+
+```text
+You are the Independent Reviewer for SwitchOps, a human-led AI incident-response workflow.
+
+Do not agree by default. Examine the assumptions behind each diagnosis and plan, identify missing evidence, challenge unsafe recommendations, and evaluate operational and customer risks, including idempotency, reconciliation and refunds where relevant.
+
+Finish each review with a verdict of ACCEPT, ACCEPT WITH CONDITIONS or REJECT, and give your reasons. Accepting a plan does not confirm a diagnosis or authorize execution. Never fabricate evidence. Preserve disagreements and escalate them to the human administrator. Post your review in the room for switchops-coordinator.
+```
+
+**switchops-reporter**
+
+```text
+You are the Incident Reporter for SwitchOps, a human-led AI incident-response workflow.
+
+When switchops-coordinator asks, produce a structured incident report with an executive summary, timeline, impact, confirmed facts, hypotheses, findings, decisions, risks and follow-up actions, using only what was shared in the room.
+
+List approved, unapproved and pending actions separately. Keep disagreements and unknowns visible. Never add facts, describe simulated actions as completed production changes, or mark an incident resolved without verification. Ask switchops-investigator and switchops-reviewer to check your draft, include their corrections, and send the revised report to switchops-coordinator.
+```
+
+</details>
+
+### 5. Connect Telegram
+
+Do these in order, because Telegram only applies the privacy setting when the bot joins a chat.
+
+1. Message [@BotFather](https://t.me/BotFather), send `/newbot`, and save the token somewhere private.
+2. Send `/mybots`, choose your bot, then **Bot Settings → Group Privacy → Turn off**.
+3. In Switch Console, open your server's **Home** page, then **Messaging apps → Connect → Telegram**. Paste the bot token and username.
+
+Never commit your token or share it in a chat. If it's exposed, send `/revoke` to BotFather.
+
+### 6. Create the room
+
+1. In Telegram, create a private group called **SwitchOps Command Center**. Telegram bots can't create chats, so you have to make it yourself.
+2. Add your bot to the group. The room then appears under **Your Rooms** in Switch Console.
+3. Send any message in the group.
+4. On the server's **Home** page, find the Telegram connection, select **Link my account…**, search for yourself and select **This is me**.
+
+Step 4 only works after you've posted. Without it, agents set to answer their owner will treat you as a stranger.
+
+### 7. Brief the room and invite the team
+
+Open the room in Switch Console and paste the `instructions` block from the [room template](templates/switchops-room.template.yaml) into its **Instructions**.
+
+Then invite each agent by sending these in the group:
+
+```text
+!invite-agent @switchops-coordinator
+!invite-agent @switchops-investigator
+!invite-agent @switchops-reviewer
+!invite-agent @switchops-reporter
+```
+
+### 8. Run a test incident
+
+First, check that the team is there:
+
+```text
+@switchops-coordinator Introduce the incident response team. List every agent in this room with its exact name and responsibility. Do not start an incident yet.
+```
+
+Then give it the same simulated incident used in the demo:
+
+```text
+@switchops-coordinator Let's start a new simulated incident for a demonstration.
+
+Incident ID: INC-DEMO-001
+Service: UPI Payment Gateway
+Incident: Customers report that payments are failing or stuck in pending.
+
+The issue reportedly started around 15 minutes ago. A payment-service deployment reportedly happened around 20 minutes ago. We do not yet have logs, metrics, deployment differences or PSP status information.
+
+Register the incident and assign a provisional severity. Separate confirmed information from assumptions. Delegate technical investigation to switchops-investigator and request an independent assessment from switchops-reviewer. Track both agents' findings in this room.
+
+Do not access or modify production systems. Do not invent logs, metrics or investigation results. Do not execute any remediation.
+```
+
+**It's working if:**
+
+- The Coordinator labels the deployment theory as an assumption, not a fact.
+- The Investigator and Reviewer both respond in the group.
+- The Reviewer gives a verdict with its reasons.
+- No action is treated as approved until you approve it.
+- The incident stays open, because recovery hasn't been verified.
+
+### If something goes wrong
+
+| What you see | What to check |
+|---|---|
+| Agents don't see messages in the group | Group Privacy may have been on when the bot joined. Turn it off, remove the bot, then add it back. |
+| An agent says it can't tell if you're its owner | Link your Telegram account (step 6). |
+| You can't find yourself under **Link my account…** | Post in the group first, and make sure your Telegram account has a username. |
+| The Coordinator can't get another agent to respond | Set that agent to **Only me and my agents**, and check it has been invited to the room. |
+| An agent stays silent | Mention its exact name, such as `@switchops-reviewer`. |
+
+For more detail, see Switch's guides on [getting started](https://github.com/sandbox-quantum/switch/tree/main/docs/official/getting-started) and [connecting Telegram](https://github.com/sandbox-quantum/switch/blob/main/docs/official/deploy/messaging-apps/telegram.md). Setup screens may vary by Switch version.
+
+> [!TIP]
+> **Using Slack, Discord, Teams or Mattermost instead?** Choose that app in steps 5 to 7. You can also try creating the room from the [room template](templates/switchops-room.template.yaml) on Switch Console's **Templates** page once your agents exist. The [exported Command Center configuration](templates/switchops-command-center.yaml) shows the original setup for reference.
 
 ## Contributing
 
