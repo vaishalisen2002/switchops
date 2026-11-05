@@ -161,16 +161,6 @@ You'll need [Switch](https://docs.switchagents.ai/switch-rooms/getting-started),
 
 Setup screens and options may vary by Switch version. This repository doesn't include credentials, bot tokens or local agent working directories.
 
-## What's next
-
-- [x] Record an end-to-end demo
-- [x] Publish room and Coordinator templates
-- [ ] Publish Investigator, Reviewer and Reporter templates
-- [ ] Add reusable incident templates and severity criteria
-- [ ] Add structured incident data and report versioning
-- [ ] Add automated tests for approval boundaries and fact-versus-hypothesis handling
-- [ ] Connect real logs, metrics and traces
-
 ## Contributing
 
 Ideas and improvements are welcome. For substantial changes, please open an issue first. Please don't submit secrets, personal data, real customer information, production logs or unredacted incident details.
